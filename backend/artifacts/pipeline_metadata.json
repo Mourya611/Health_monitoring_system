@@ -1,0 +1,45 @@
+{
+  "feature_cols": [
+    "Heart Rate",
+    "Hour",
+    "Minute",
+    "Second",
+    "Body Temperature",
+    "Oxygen Saturation",
+    "Systolic Blood Pressure",
+    "Diastolic Blood Pressure",
+    "Age",
+    "Gender_encoded",
+    "Weight (kg)",
+    "Height (m)",
+    "Derived_HRV",
+    "Derived_Pulse_Pressure",
+    "Derived_BMI",
+    "Derived_MAP"
+  ],
+  "scale_cols": [
+    "Heart Rate",
+    "Hour",
+    "Minute",
+    "Second",
+    "Body Temperature",
+    "Oxygen Saturation",
+    "Systolic Blood Pressure",
+    "Diastolic Blood Pressure",
+    "Age",
+    "Weight (kg)",
+    "Height (m)",
+    "Derived_HRV",
+    "Derived_Pulse_Pressure",
+    "Derived_BMI",
+    "Derived_MAP"
+  ],
+  "gender_classes": [
+    "Female",
+    "Male"
+  ],
+  "risk_classes": [
+    "High Risk",
+    "Low Risk"
+  ]
+}

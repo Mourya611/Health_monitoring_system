@@ -1,0 +1,11 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Python
+backend/__pycache__/
+backend/*.pyc
+
+# Generated data
+backend/data/patients.csv
+backend/output/*.csv

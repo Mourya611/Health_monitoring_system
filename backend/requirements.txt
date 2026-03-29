@@ -1,0 +1,15 @@
+pandas
+numpy
+scikit-learn
+joblib
+tensorflow
+torch
+transformers
+datasets
+accelerate
+nltk
+pymupdf
+pdfplumber
+fastapi
+uvicorn
+python-multipart

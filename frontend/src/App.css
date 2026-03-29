@@ -1,0 +1,136 @@
+#root {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.dashboard {
+  text-align: center;
+  color: #0f172a;
+}
+
+.hero-title {
+  font-size: 3rem;
+  line-height: 1.1;
+  font-weight: 900;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, #1d4ed8 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.metric-card {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.metric-card p {
+  font-size: 1.25rem;
+  margin: 6px 0 0;
+  font-weight: 700;
+}
+
+.profile-box,
+.prediction-box,
+.table-box,
+.chart-wrapper {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  margin: 16px 0;
+  padding: 16px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.profile-grid label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.profile-grid input,
+.profile-grid select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #94a3b8;
+}
+
+.risk-high {
+  color: #b91c1c;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.risk-low {
+  color: #15803d;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.derived-box {
+  margin-top: 10px;
+  text-align: left;
+  display: inline-block;
+}
+
+.download-btn {
+  margin: 10px 0;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #0f766e;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  background: #115e59;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.table-box {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #cbd5e1;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+th {
+  background: #f1f5f9;
+}
