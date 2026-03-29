@@ -17,6 +17,7 @@ Realtime health monitoring project with:
 
 - Medical Transcriptions (NLP training): `https://www.kaggle.com/datasets/tboyle10/medicaltranscriptions`
 - Human Vital Sign Dataset (physiological model training): `https://www.kaggle.com/datasets/nasirayub2/human-vital-sign-dataset`
+- Download these datasets locally into `backend/data/` before training.
 
 ## Run Steps (Windows / PowerShell)
 
@@ -77,6 +78,7 @@ Expected output when all services are running:
 
 - The NLP inference supports BioBERT as primary model.
 - If `backend/models/biobert` is missing, it auto-falls back to TF-IDF artifacts when available.
+- Trained artifacts, runtime logs, caches, and local backups are intentionally excluded from git for a clean portfolio repository.
 
 ## Security Notes
 

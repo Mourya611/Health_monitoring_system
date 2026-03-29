@@ -1,11 +1,28 @@
 # Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
 
 # Python
 backend/__pycache__/
 backend/*.pyc
+**/__pycache__/
+*.py[cod]
 
 # Generated data
 backend/data/patients.csv
 backend/output/*.csv
+backend/artifacts/
+backend/models/
+backend/data/*.csv
+!backend/data/.gitkeep
+human_vital_signs_dataset_2024.csv
+
+# Local runtime logs
+*.log
+*.out
+*.err
+
+# Local backups and notebooks
+_legacy_root_backup/
+*.ipynb
