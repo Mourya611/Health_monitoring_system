@@ -49,6 +49,7 @@ cd frontend
 npm install
 npm run dev
 ```
+<img width="1920" height="1080" alt="Screenshot (587)" src="https://github.com/user-attachments/assets/79c2af28-0554-4a75-a46e-3388db89c28b" />
 
 ## Local Host Links
 
