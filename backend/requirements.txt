@@ -5,6 +5,7 @@ joblib
 tensorflow
 torch
 transformers
+sentencepiece
 datasets
 accelerate
 nltk
@@ -13,3 +14,4 @@ pdfplumber
 fastapi
 uvicorn
 python-multipart
+google-genai

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { database } from "./firebase";
+import { database, firebaseInitError } from "./firebase";
 import { onValue, ref } from "firebase/database";
 import {
   CategoryScale,
@@ -53,7 +53,9 @@ function App() {
   const [finalScore, setFinalScore] = useState("--");
   const [finalRiskCategory, setFinalRiskCategory] = useState("--");
   const [nlpConfidence, setNlpConfidence] = useState("--");
-  const [nlpApiStatus, setNlpApiStatus] = useState("Not connected");
+  const [nlpApiStatus, setNlpApiStatus] = useState("Checking...");
+  const [reportSummary, setReportSummary] = useState("");
+  const [analysisSource, setAnalysisSource] = useState("--");
 
   const patientProfileReady = useMemo(() => {
     return Number(age) > 0 && Number(weight) > 0 && Number(height) > 0 && gender;
@@ -133,6 +135,45 @@ function App() {
   };
 
   useEffect(() => {
+    if (!database) {
+      setFirebaseStatus(
+        `${firebaseInitError || "Firebase is not configured."} Running in mock mode.`
+      );
+
+      let current = { heartRate: 78, spo2: 98, temperature: 98.6, status: "NORMAL" };
+      const pushMockReading = () => {
+        current = {
+          heartRate: Math.max(55, Math.min(130, current.heartRate + (Math.random() * 8 - 4))),
+          spo2: Math.max(90, Math.min(100, current.spo2 + (Math.random() * 2 - 1))),
+          temperature: Math.max(96.0, Math.min(102.0, current.temperature + (Math.random() * 0.6 - 0.3))),
+          status: "NORMAL",
+        };
+
+        const nowLabel = new Date().toLocaleTimeString();
+        const rounded = {
+          heartRate: Number(current.heartRate.toFixed(0)),
+          spo2: Number(current.spo2.toFixed(0)),
+          temperature: Number(current.temperature.toFixed(1)),
+          status: current.status,
+        };
+
+        setHeartRate(rounded.heartRate);
+        setSpo2(rounded.spo2);
+        setTemperature(rounded.temperature);
+        setStatus(rounded.status);
+        setTimeLabel(nowLabel);
+        setLabels((prevLabels) => [...prevLabels.slice(-39), nowLabel]);
+        setHrData((prevHr) => [...prevHr.slice(-39), rounded.heartRate]);
+        setSpo2Data((prevSpo2) => [...prevSpo2.slice(-39), rounded.spo2]);
+        setTempData((prevTemp) => [...prevTemp.slice(-39), rounded.temperature]);
+        callPredictionApi(rounded);
+      };
+
+      pushMockReading();
+      const timer = setInterval(pushMockReading, 3000);
+      return () => clearInterval(timer);
+    }
+
     const patientRef = ref(database, "hospital/patient1");
     const unsubscribe = onValue(
       patientRef,
@@ -169,7 +210,7 @@ function App() {
     );
 
     return () => unsubscribe();
-  }, [age, gender, height, weight, patientProfileReady]);
+  }, [age, gender, height, weight, patientProfileReady, database, firebaseInitError]);
 
   useEffect(() => {
     if (hrData.length < WINDOW_SIZE) {
@@ -195,6 +236,34 @@ function App() {
     }
     setDataset(features);
   }, [hrData, spo2Data, tempData, labels]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkNlpHealth = async () => {
+      try {
+        const res = await fetch(`${NLP_API_BASE}/health`);
+        if (!res.ok) {
+          throw new Error(`Health check failed (${res.status})`);
+        }
+        if (!cancelled) {
+          setNlpApiStatus("Connected");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setNlpApiStatus(`Not connected: ${error.message}`);
+        }
+      }
+    };
+
+    checkNlpHealth();
+    const intervalId = setInterval(checkNlpHealth, 30000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   const downloadCSV = () => {
     if (dataset.length === 0) {
@@ -241,6 +310,8 @@ function App() {
       const data = await res.json();
       setNlpScore(Number(data.nlp_score).toFixed(4));
       setNlpConfidence((Number(data.confidence) * 100).toFixed(2));
+      setReportSummary(data.report_summary || "");
+      setAnalysisSource(data.analysis_source || "--");
       setNlpApiStatus("Connected");
     } catch (error) {
       setNlpApiStatus(`NLP API error: ${error.message}`);
@@ -276,6 +347,8 @@ function App() {
       setFinalScore(Number(data.final_score).toFixed(4));
       setFinalRiskCategory(data.risk_category);
       setNlpConfidence(Number(data.confidence).toFixed(2));
+      setReportSummary(data.report_summary || "");
+      setAnalysisSource(data.analysis_source || "--");
       setNlpApiStatus("Connected");
     } catch (error) {
       setNlpApiStatus(`NLP API error: ${error.message}`);
@@ -413,6 +486,8 @@ function App() {
         </div>
         <p>NLP Confidence: {nlpConfidence} %</p>
         <p>NLP API: {nlpApiStatus}</p>
+        <p>Analysis Source: {analysisSource}</p>
+        {reportSummary && <p>Report Summary: {reportSummary}</p>}
       </div>
 
       <button className="download-btn" onClick={downloadCSV}>

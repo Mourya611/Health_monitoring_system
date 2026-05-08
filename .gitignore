@@ -12,6 +12,8 @@ backend/*.pyc
 # Generated data
 backend/data/patients.csv
 backend/output/*.csv
+backend/output/*.log
+!backend/output/.gitkeep
 backend/artifacts/
 backend/models/
 backend/data/*.csv

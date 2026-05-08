@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import os
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
+from nlp.gemini_report import get_gemini_report_analyzer
 from nlp.inference import BioBERTRiskScorer
-from nlp.pdf_utils import extract_text_from_pdf_bytes
+from nlp.pdf_utils import PdfTextExtractionError, extract_text_from_pdf_bytes
 from nlp.risk_fusion import combine_scores
 
 app = FastAPI(title="Smart Health NLP API", version="1.0.0")
@@ -25,9 +28,30 @@ def get_scorer() -> BioBERTRiskScorer:
     return scorer
 
 
+def extract_report_text(pdf_bytes: bytes, filename: str) -> tuple[str, dict]:
+    if os.getenv("GEMINI_API_KEY"):
+        summary = get_gemini_report_analyzer().summarize_pdf_bytes(pdf_bytes, filename=filename)
+        return summary.as_classifier_text(), {
+            "analysis_source": "gemini_pdf_summary",
+            "report_summary": summary.concise_summary,
+            "structured_summary": summary.model_dump(),
+        }
+
+    extracted_text = extract_text_from_pdf_bytes(pdf_bytes)
+    return extracted_text, {
+        "analysis_source": "local_pdf_extraction",
+        "report_summary": extracted_text[:500],
+        "structured_summary": None,
+    }
+
+
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "nlp"}
+    return {
+        "status": "ok",
+        "service": "nlp",
+        "report_analysis_mode": "gemini" if os.getenv("GEMINI_API_KEY") else "local",
+    }
 
 
 @app.post("/upload-pdf")
@@ -38,9 +62,12 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not pdf_bytes:
         raise HTTPException(status_code=400, detail="Uploaded PDF is empty.")
 
-    extracted_text = extract_text_from_pdf_bytes(pdf_bytes)
-    if not extracted_text.strip():
-        raise HTTPException(status_code=400, detail="No readable text found in PDF.")
+    try:
+        extracted_text, analysis_meta = extract_report_text(pdf_bytes, file.filename)
+    except PdfTextExtractionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     try:
         result = get_scorer().score_text(extracted_text)
@@ -51,6 +78,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         "confidence": result.confidence,
         "predicted_label": result.predicted_label,
         "extracted_text_preview": extracted_text[:500],
+        **analysis_meta,
     }
 
 
@@ -66,9 +94,12 @@ async def predict_risk(
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 
     pdf_bytes = await file.read()
-    extracted_text = extract_text_from_pdf_bytes(pdf_bytes)
-    if not extracted_text.strip():
-        raise HTTPException(status_code=400, detail="No readable text found in PDF.")
+    try:
+        extracted_text, analysis_meta = extract_report_text(pdf_bytes, file.filename)
+    except PdfTextExtractionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     try:
         nlp_result = get_scorer().score_text(extracted_text)
@@ -85,4 +116,5 @@ async def predict_risk(
         "final_score": fusion.final_score,
         "risk_category": fusion.risk_category,
         "confidence": fusion.confidence,
+        **analysis_meta,
     }
